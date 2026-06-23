@@ -24,12 +24,10 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
 
-            /* Фоновое изображение */
             background: url('IMG_7777.jpg') center/cover no-repeat fixed;
             position: relative;
         }
 
-        /* Полупрозрачный фиолетовый оверлей для мягкости */
         body::before {
             content: "";
             position: fixed;
@@ -52,7 +50,6 @@
             pointer-events: none;
         }
 
-        /* Гибкий контейнер для центра и боковых фото */
         .page-layout {
             position: relative;
             z-index: 10;
@@ -63,7 +60,6 @@
             max-width: 95vw;
         }
 
-        /* Увеличенные прямоугольные фотографии по бокам */
         .side-photo {
             width: 250px;
             height: 450px;
@@ -94,6 +90,7 @@
             width: 380px;
             transition: transform 0.2s ease;
             cursor: default;
+            position: relative;
         }
 
         .container:active {
@@ -231,7 +228,41 @@
             letter-spacing: 1px;
         }
 
-        /* Прячем боковые фото на экранах уже 950px, чтобы всё помещалось */
+        /* Кнопка-сердечко для музыки */
+        .music-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: none;
+            border: none;
+            font-size: 2.2rem;
+            cursor: pointer;
+            filter: drop-shadow(0 0 12px #ffb3ff);
+            transition: transform 0.3s, filter 0.3s;
+            z-index: 20;
+            animation: pulse 2s infinite;
+            background: transparent;
+            outline: none;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 20px #ff80bf);
+        }
+
+        .music-btn.playing {
+            animation: none;
+            filter: drop-shadow(0 0 20px #ff4da6);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
         @media (max-width: 950px) {
             .side-photo {
                 display: none;
@@ -241,6 +272,13 @@
             }
             .container {
                 width: 380px;
+            }
+            .music-btn {
+                top: 10px;
+                right: 15px;
+                font-size: 2rem;
+                width: 44px;
+                height: 44px;
             }
         }
 
@@ -255,6 +293,13 @@
             .slide img {
                 max-height: 210px;
             }
+            .music-btn {
+                top: 5px;
+                right: 10px;
+                font-size: 1.8rem;
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
@@ -265,6 +310,9 @@
         <img src="IMG_6338.jpg" alt="Майя слева" class="side-photo">
         
         <div class="container">
+            <!-- Кнопка-сердечко для музыки -->
+            <button id="musicToggle" class="music-btn" aria-label="Включить музыку">❤️</button>
+
             <h1>Майя,</h1>
             <div class="sub-message">ты самая прекрасная</div>
             <div class="extra-message">Ты луч утреннего солнца в моей жизни</div>
@@ -292,7 +340,41 @@
         <img src="IMG_7407.jpg" alt="Майя справа" class="side-photo">
     </div>
 
+    <!-- Аудио-плеер -->
+    <audio id="bgMusic" loop>
+        <!-- Если загрузил свой mp3, замени src на "song.mp3" -->
+        <source src="https://cdn.pixabay.com/audio/2022/10/18/audio_1e7d4c5b8e.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
     <script>
+        // ---------- Управление музыкой ----------
+        const musicBtn = document.getElementById('musicToggle');
+        const bgMusic = document.getElementById('bgMusic');
+        let musicPlaying = false;
+
+        musicBtn.addEventListener('click', () => {
+            if (musicPlaying) {
+                bgMusic.pause();
+                musicBtn.classList.remove('playing');
+                musicBtn.style.animation = 'pulse 2s infinite'; // возвращаем пульсацию
+            } else {
+                bgMusic.play().catch(e => {
+                    alert('Нажмите ещё раз – браузер требует взаимодействия для воспроизведения.');
+                });
+                musicBtn.classList.add('playing');
+                musicBtn.style.animation = 'none'; // останавливаем пульсацию при воспроизведении
+            }
+            musicPlaying = !musicPlaying;
+        });
+
+        // Синхронизация при завершении трека (хотя он зациклен)
+        bgMusic.addEventListener('ended', () => {
+            musicPlaying = false;
+            musicBtn.classList.remove('playing');
+            musicBtn.style.animation = 'pulse 2s infinite';
+        });
+
         // ---------- Галерея ----------
         const gallery = document.getElementById('gallery');
         const slides = document.querySelectorAll('.slide');
